@@ -141,6 +141,58 @@
     "uncertain": "未明确说明：(1) 是否在标准定价内 / 额外收费；(2) OAuth 同意页能否完全去 Zernio 品牌；(3) 嵌入到付费 SaaS 的转售条款",
     "needsConfirm": "邮件 sales 确认 white-label 边界"
   },
+  "whitelabelRemoval": {
+    "method": "Headless OAuth 模式",
+    "availability": "全套餐免费包含（含 Free / Standard / Enterprise）",
+    "officialDoc": "https://zernio.com/blog/whitelabel-facebook-oauth-integration-guide",
+    "summary": "OAuth URL 加 ?headless=true 参数 → 跳过 Zernio 自己的 page selector → 用户授权后直接回到你的域名 → 你用自己的 UI 完成 page 选择 → POST 选择回 Zernio API",
+    "whatItRemoves": [
+      "Zernio 域名上的中转页",
+      "Zernio 风格的 page selector UI",
+      "redirect 经过 Zernio 的视觉跳转感"
+    ],
+    "whatItDoesntRemove": [
+      "平台原生授权弹窗仍显示 Zernio 注册的 App 名（如 'Social Media Connector'）— 这是各平台 OAuth 协议本身决定的，要彻底改需自己向 Meta/TikTok 申请独立 App 并过审"
+    ],
+    "steps": [
+      {
+        "n": 1,
+        "title": "构造 connect URL，加 headless=true",
+        "code": "GET https://zernio.com/api/v1/connect/facebook?profileId=YOUR_PROFILE_ID&redirect_url=https://yourapp.com/facebook/callback&headless=true",
+        "note": "Authorization: Bearer YOUR_API_KEY"
+      },
+      {
+        "n": 2,
+        "title": "Zernio 返回 authUrl",
+        "code": "{ \"authUrl\": \"https://www.facebook.com/dialog/oauth?...\" }",
+        "note": "你前端跳转到这个 authUrl，让用户去 Facebook 授权"
+      },
+      {
+        "n": 3,
+        "title": "用户在 Facebook 授权后，跳回你的 callback",
+        "code": "GET https://yourapp.com/facebook/callback?profileId=...&tempToken=...&userProfile=...&connect_token=...&platform=facebook&step=select_page",
+        "note": "URL 上带 6 个参数，userProfile 是 URL-encoded JSON"
+      },
+      {
+        "n": 4,
+        "title": "用 tempToken 拉可用 Page 列表",
+        "code": "GET https://zernio.com/api/v1/connect/facebook/select-page?profileId={id}&tempToken={token}\nHeader: X-Connect-Token: {connect_token}",
+        "note": "在你的页面渲染自己设计的 Page 选择器（替换 Zernio 默认 UI）"
+      },
+      {
+        "n": 5,
+        "title": "用户选 Page 后，POST 选择回 Zernio",
+        "code": "POST https://zernio.com/api/v1/connect/facebook/select-page\nBody: { profileId, pageId, tempToken, userProfile }",
+        "note": "Zernio 完成 page 绑定，echo-app 拿到 ChannelConnection"
+      }
+    ],
+    "echoAppMapping": [
+      "src/app/api/channels/zernio/[platform]/connect/route.ts —— 步骤 1+2，构造 URL → 返回 authUrl",
+      "src/app/api/channels/zernio/[platform]/callback/route.ts —— 步骤 3，接住 tempToken",
+      "src/app/[lang]/(dashboard)/social/settings/connect-zernio/page.tsx —— 步骤 4，渲染自定义 Page 选择器",
+      "POST /api/channels/zernio/[platform]/select-page —— 步骤 5，转发到 Zernio API"
+    ]
+  },
   "openQuestionsForSales": [
     {
       "id": 1,
