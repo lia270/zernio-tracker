@@ -1,0 +1,176 @@
+{
+  "lastUpdated": "2026-05-08",
+  "verifiedAt": "2026-05-08",
+  "sources": [
+    "https://zernio.com/",
+    "https://zernio.com/pricing",
+    "https://zernio.com/features",
+    "https://zernio.com/blog/white-label-social-media-scheduler"
+  ],
+  "product": {
+    "name": "Zernio",
+    "tagline": "Developer-first REST API + MCP server，一个 API 操作 15+ 社媒平台",
+    "website": "https://zernio.com",
+    "docs": "https://zernio.com/features",
+    "targetAudience": "开发者 / AI Agents / SaaS 公司（非终端商家）",
+    "uptimeSLA": "99.7%+",
+    "refundPolicy": "30 天退款保证",
+    "freeTier": "前 2 个连接账号免费，无需信用卡"
+  },
+  "pricingTiers": [
+    {
+      "range": "1–2 账号",
+      "pricePerAccount": 0,
+      "label": "免费",
+      "monthlyExample": 0,
+      "note": "无需信用卡，全功能"
+    },
+    {
+      "range": "3–10 账号",
+      "pricePerAccount": 6,
+      "label": "$6/账号/月",
+      "monthlyExample": 60,
+      "note": "10 个账号举例：8 付费 × $6 = $48"
+    },
+    {
+      "range": "11–100 账号",
+      "pricePerAccount": 3,
+      "label": "$3/账号/月",
+      "monthlyExample": 300,
+      "note": "100 个账号 ≈ $300/月"
+    },
+    {
+      "range": "101–2000 账号",
+      "pricePerAccount": 1,
+      "label": "$1/账号/月",
+      "monthlyExample": 2000,
+      "note": "2000 个账号 ≈ $2000/月"
+    },
+    {
+      "range": "2001+ 账号",
+      "pricePerAccount": null,
+      "label": "定制报价",
+      "monthlyExample": null,
+      "note": "联系销售"
+    }
+  ],
+  "billing": {
+    "model": "按账号用量计费，每个计费周期末扣款",
+    "setupFees": "无",
+    "hiddenFees": "无",
+    "annualDiscount": "未在定价页公开提及",
+    "cancellation": "随时断开账号即停止扣费"
+  },
+  "passThroughCosts": {
+    "platform": "X (Twitter)",
+    "note": "X 平台单独按调用计费（零加价透传），且分析与 inbox 同步可选关闭以控制成本",
+    "items": [
+      { "type": "Read", "cost": "$0.005 / 请求" },
+      { "type": "Write", "cost": "$0.010 / 请求" },
+      { "type": "DM 发送", "cost": "$0.015 / 请求" }
+    ]
+  },
+  "discrepancyAlert": {
+    "issue": "定价页 vs 功能页对 Add-on 描述不一致",
+    "pricingPageSays": "Scheduling, analytics, DMs, comments, ads, webhooks 全部 bundled 不加钱",
+    "featuresPageSays": "Comments API / DMs API / Analytics / Ads Manager / Comment to DM 标记为 Add-on",
+    "impact": "老板需求 #2 的核心是评论 + DM 自动回复 — 落地前必须跟 sales 邮件确认实际价格",
+    "severity": "high"
+  },
+  "coreFeatures": [
+    { "name": "Social Media API", "desc": "统一 REST API，OpenAPI 3.1 规范" },
+    { "name": "Post Scheduler", "desc": "排期发布，支持时区" },
+    { "name": "Bulk Scheduling", "desc": "CSV 批量上传几百条帖子" },
+    { "name": "Queue Posts", "desc": "自动选择最佳发布时段" },
+    { "name": "First Comment", "desc": "发布后自动追评第一条" },
+    { "name": "Content Calendar", "desc": "可视化日历 + 拖拽" },
+    { "name": "Team Collaboration", "desc": "所有套餐都送无限团队成员" },
+    { "name": "MCP Server", "desc": "原生支持 AI agent 接入" }
+  ],
+  "addOnFeatures": [
+    { "name": "Comments API", "desc": "评论读取 / 回复 / 审核", "criticalForUs": true },
+    { "name": "DMs API", "desc": "覆盖 7 个平台的 DM 收发", "criticalForUs": true },
+    { "name": "Comment to DM", "desc": "评论关键词触发自动 DM", "criticalForUs": true },
+    { "name": "Analytics API", "desc": "跨平台互动数据指标", "criticalForUs": false },
+    { "name": "Ads Manager", "desc": "Meta/Google/TikTok/LinkedIn/Pinterest/X 广告投放", "criticalForUs": false },
+    { "name": "Tools API", "desc": "视频下载、转写、字幕", "criticalForUs": false }
+  ],
+  "platforms": [
+    { "name": "Instagram", "category": "social", "emoji": "📷" },
+    { "name": "Facebook", "category": "social", "emoji": "📘" },
+    { "name": "TikTok", "category": "social", "emoji": "🎵" },
+    { "name": "X / Twitter", "category": "social", "emoji": "🐦", "note": "按调用计费" },
+    { "name": "LinkedIn", "category": "social", "emoji": "💼" },
+    { "name": "YouTube", "category": "social", "emoji": "▶️" },
+    { "name": "Threads", "category": "social", "emoji": "🧵" },
+    { "name": "Pinterest", "category": "social", "emoji": "📌" },
+    { "name": "Reddit", "category": "social", "emoji": "🤖" },
+    { "name": "Bluesky", "category": "social", "emoji": "🦋" },
+    { "name": "WhatsApp", "category": "messaging", "emoji": "💬" },
+    { "name": "Telegram", "category": "messaging", "emoji": "✈️" },
+    { "name": "Snapchat", "category": "social", "emoji": "👻" },
+    { "name": "Discord", "category": "messaging", "emoji": "🎮" },
+    { "name": "Google Business", "category": "review", "emoji": "🏪", "note": "和 echo-app 现有 GBP 集成有重叠" }
+  ],
+  "adNetworks": [
+    "Meta Ads",
+    "Google Ads",
+    "LinkedIn Ads",
+    "TikTok Ads",
+    "Pinterest Ads",
+    "X Ads"
+  ],
+  "apiEndpointGroups": [
+    "Posting API",
+    "Comments API",
+    "Messaging API (DMs)",
+    "Analytics API",
+    "Ads API",
+    "Comment to DM",
+    "Tools API"
+  ],
+  "techStack": {
+    "apiSpec": "OpenAPI 3.1",
+    "auth": "OAuth 2.1 + PKCE",
+    "mcp": "原生 MCP Server",
+    "sdk": "未提供官方 SDK，需基于 OpenAPI 自行生成",
+    "llmDocs": "提供 LLM-friendly 文档摘要"
+  },
+  "whitelabelNotes": {
+    "claim": "官方 blog 提及 white-label 支持（custom branding：替换 logo / 颜色 / 域名）",
+    "uncertain": "未明确说明：(1) 是否在标准定价内 / 额外收费；(2) OAuth 同意页能否完全去 Zernio 品牌；(3) 嵌入到付费 SaaS 的转售条款",
+    "needsConfirm": "邮件 sales 确认 white-label 边界"
+  },
+  "openQuestionsForSales": [
+    {
+      "id": 1,
+      "question": "OAuth 同意页能否显示 echo-app 品牌而非 'Social Media Connector'？",
+      "priority": "high",
+      "blocker": true
+    },
+    {
+      "id": 2,
+      "question": "Inbox（Comments + DMs）add-on 启用后单账号实际月费是多少？",
+      "priority": "high",
+      "blocker": true
+    },
+    {
+      "id": 3,
+      "question": "嵌入到付费 SaaS 转售给终端客户，是否需要单独 reseller 协议？",
+      "priority": "high",
+      "blocker": true
+    },
+    {
+      "id": 4,
+      "question": "TikTok / IG / GBP 单账号每日 / 每分钟的发帖 + 评论回复速率上限？",
+      "priority": "medium",
+      "blocker": false
+    },
+    {
+      "id": 5,
+      "question": "SLA 承诺细节、故障通知渠道、补偿机制？",
+      "priority": "medium",
+      "blocker": false
+    }
+  ]
+}

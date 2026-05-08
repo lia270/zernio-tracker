@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Zernio 调研看板 · 集成可行性评估</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+          "Microsoft YaHei", sans-serif;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+      }
+      .stat-num {
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1;
+        color: #111827;
+      }
+      .stat-label {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 4px;
+      }
+      .tier-bar {
+        position: relative;
+        height: 56px;
+        border-radius: 8px;
+        background: linear-gradient(90deg, #dcfce7 0%, #fef3c7 100%);
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+      }
+      .platform-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 13px;
+      }
+      .calc-input {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: #e5e7eb;
+        outline: none;
+        appearance: none;
+        cursor: pointer;
+      }
+      .calc-input::-webkit-slider-thumb {
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        background: #ea580c;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+      .calc-input::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        background: #ea580c;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 0;
+      }
+      .badge-core {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .badge-addon {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .badge-passthrough {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .badge-blocker {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .badge-medium {
+        background: #fef9c3;
+        color: #854d0e;
+      }
+    </style>
+  </head>
+  <body class="bg-stone-50 text-stone-900 min-h-screen">
+    <div class="max-w-6xl mx-auto px-6 py-10">
+      <!-- Header -->
+      <header class="mb-10">
+        <div class="flex items-center gap-3 mb-3">
+          <div
+            class="w-10 h-10 rounded-lg bg-orange-600 flex items-center justify-center text-white font-bold"
+          >
+            Z
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold">Zernio 集成可行性评估</h1>
+            <p class="text-sm text-stone-500" id="tagline"></p>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-3 text-xs text-stone-500">
+          <span>调研日期：<span id="lastUpdated"></span></span>
+          <span>·</span>
+          <span>数据核实：WebFetch 实时爬取</span>
+          <span>·</span>
+          <a
+            href="https://zernio.com"
+            target="_blank"
+            class="text-orange-600 hover:underline"
+            >zernio.com ↗</a
+          >
+        </div>
+      </header>
+
+      <!-- Quick Stats -->
+      <section class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-10">
+        <div class="card p-4">
+          <div class="stat-num" id="stat-platforms">—</div>
+          <div class="stat-label">支持平台</div>
+        </div>
+        <div class="card p-4">
+          <div class="stat-num" id="stat-ads">—</div>
+          <div class="stat-label">广告网络</div>
+        </div>
+        <div class="card p-4">
+          <div class="stat-num">$0–$6</div>
+          <div class="stat-label">单账号月费区间</div>
+        </div>
+        <div class="card p-4">
+          <div class="stat-num" id="stat-uptime">—</div>
+          <div class="stat-label">SLA 可用性</div>
+        </div>
+        <div class="card p-4">
+          <div class="stat-num">30 天</div>
+          <div class="stat-label">退款保证</div>
+        </div>
+      </section>
+
+      <!-- Discrepancy Alert -->
+      <section
+        id="alert"
+        class="card border-red-200 bg-red-50 p-5 mb-10 hidden"
+      >
+        <div class="flex items-start gap-3">
+          <div class="text-2xl">⚠️</div>
+          <div>
+            <div class="font-semibold text-red-900 mb-1" id="alert-issue"></div>
+            <div class="text-sm text-red-800 space-y-1" id="alert-body"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Cost Calculator -->
+      <section class="card p-6 mb-10">
+        <h2 class="text-lg font-semibold mb-1">📊 成本计算器</h2>
+        <p class="text-sm text-stone-500 mb-5">
+          按你的预期账号数估算月成本（前 2 个免费）
+        </p>
+        <div class="flex items-center gap-6 mb-4">
+          <div class="flex-1">
+            <input
+              type="range"
+              id="calc-slider"
+              class="calc-input"
+              min="1"
+              max="200"
+              value="10"
+            />
+            <div
+              class="flex justify-between text-xs text-stone-400 mt-1 px-1"
+            >
+              <span>1</span>
+              <span>50</span>
+              <span>100</span>
+              <span>150</span>
+              <span>200</span>
+            </div>
+          </div>
+          <div class="text-right min-w-[120px]">
+            <div class="text-3xl font-bold" id="calc-accounts">10</div>
+            <div class="text-xs text-stone-500">账号数</div>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-4 pt-4 border-t border-stone-100">
+          <div>
+            <div class="text-xs text-stone-500 mb-1">免费</div>
+            <div class="font-semibold" id="calc-free">2 账号</div>
+          </div>
+          <div>
+            <div class="text-xs text-stone-500 mb-1">付费档位</div>
+            <div class="font-semibold" id="calc-tier">$6/账号</div>
+          </div>
+          <div>
+            <div class="text-xs text-stone-500 mb-1">月成本</div>
+            <div class="font-semibold text-orange-600" id="calc-total">
+              $48/月
+            </div>
+          </div>
+        </div>
+        <div
+          class="text-xs text-stone-500 mt-3"
+          id="calc-note"
+        ></div>
+      </section>
+
+      <!-- Pricing Tiers -->
+      <section class="mb-10">
+        <h2 class="text-lg font-semibold mb-4">💰 阶梯定价（按账号数）</h2>
+        <div class="card p-5 space-y-3" id="tier-list"></div>
+        <div class="card border-red-200 bg-red-50 p-4 mt-4">
+          <h3 class="font-semibold text-sm text-red-900 mb-2">
+            🐦 X / Twitter 按调用透传计费（无加价）
+          </h3>
+          <div class="grid grid-cols-3 gap-3" id="passthrough-list"></div>
+          <p class="text-xs text-red-800 mt-3" id="passthrough-note"></p>
+        </div>
+      </section>
+
+      <!-- Features Matrix -->
+      <section class="mb-10">
+        <h2 class="text-lg font-semibold mb-4">🎯 功能矩阵</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="card p-5">
+            <h3 class="font-semibold mb-3 flex items-center gap-2">
+              <span
+                class="text-xs px-2 py-0.5 rounded badge-core"
+              >核心</span>
+              每账号包含
+            </h3>
+            <div class="space-y-2 text-sm" id="core-features"></div>
+          </div>
+          <div class="card p-5">
+            <h3 class="font-semibold mb-3 flex items-center gap-2">
+              <span
+                class="text-xs px-2 py-0.5 rounded badge-addon"
+              >Add-on</span>
+              额外计费（价格未公开）
+            </h3>
+            <div class="space-y-2 text-sm" id="addon-features"></div>
+            <p class="text-xs text-stone-500 mt-3 pt-3 border-t border-stone-100">
+              🔴 = 老板需求 #2 直接需要的能力
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Platforms Grid -->
+      <section class="mb-10">
+        <h2 class="text-lg font-semibold mb-4">🌐 支持的 15 个平台</h2>
+        <div class="card p-5">
+          <div class="flex flex-wrap gap-2" id="platform-list"></div>
+          <div class="mt-4 pt-4 border-t border-stone-100">
+            <div class="text-xs text-stone-500 mb-2">广告网络（6 个）</div>
+            <div class="flex flex-wrap gap-2" id="ads-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tech Stack -->
+      <section class="mb-10">
+        <h2 class="text-lg font-semibold mb-4">🛠 技术栈与集成</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="card p-5">
+            <h3 class="font-semibold text-sm mb-3">技术规范</h3>
+            <dl class="text-sm space-y-2" id="tech-stack"></dl>
+          </div>
+          <div class="card p-5">
+            <h3 class="font-semibold text-sm mb-3">API 端点组</h3>
+            <div class="flex flex-wrap gap-2" id="endpoint-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Open Questions -->
+      <section class="mb-10">
+        <h2 class="text-lg font-semibold mb-4">❓ 决策前必问 sales 的问题</h2>
+        <div class="card p-5">
+          <ol class="space-y-3" id="questions-list"></ol>
+        </div>
+      </section>
+
+      <!-- White-label Notes -->
+      <section class="mb-10">
+        <h2 class="text-lg font-semibold mb-4">🏷 白牌（White-label）说明</h2>
+        <div class="card p-5">
+          <div class="text-sm space-y-3" id="whitelabel-info"></div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="mt-12 pt-6 border-t border-stone-200 text-xs text-stone-500">
+        <div class="mb-2 font-medium">数据来源</div>
+        <ul class="space-y-1" id="sources-list"></ul>
+        <p class="mt-4">
+          完整书面分析见
+          <code class="bg-stone-100 px-1 py-0.5 rounded"
+            >docs/zernio-integration-assessment.md</code
+          >
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      async function load() {
+        const data = await (await fetch("data.json")).json();
+
+        // Header
+        document.getElementById("tagline").textContent =
+          data.product.tagline;
+        document.getElementById("lastUpdated").textContent =
+          data.lastUpdated;
+
+        // Stats
+        document.getElementById("stat-platforms").textContent =
+          data.platforms.length;
+        document.getElementById("stat-ads").textContent =
+          data.adNetworks.length;
+        document.getElementById("stat-uptime").textContent =
+          data.product.uptimeSLA;
+
+        // Alert
+        if (data.discrepancyAlert) {
+          const a = document.getElementById("alert");
+          a.classList.remove("hidden");
+          document.getElementById("alert-issue").textContent =
+            "矛盾点：" + data.discrepancyAlert.issue;
+          document.getElementById("alert-body").innerHTML = `
+            <div>定价页：${data.discrepancyAlert.pricingPageSays}</div>
+            <div>功能页：${data.discrepancyAlert.featuresPageSays}</div>
+            <div class="mt-2 font-medium">影响：${data.discrepancyAlert.impact}</div>
+          `;
+        }
+
+        // Cost Calculator
+        const slider = document.getElementById("calc-slider");
+        const tiers = data.pricingTiers;
+        function calcCost(n) {
+          if (n <= 2) return { paid: 0, rate: 0, total: 0, range: "1–2" };
+          if (n <= 10)
+            return {
+              paid: n - 2,
+              rate: 6,
+              total: (n - 2) * 6,
+              range: "3–10",
+            };
+          if (n <= 100)
+            return {
+              paid: n - 2,
+              rate: 3,
+              total: (n - 2) * 3,
+              range: "11–100",
+            };
+          if (n <= 2000)
+            return {
+              paid: n - 2,
+              rate: 1,
+              total: (n - 2) * 1,
+              range: "101–2000",
+            };
+          return { paid: n, rate: null, total: null, range: "2001+" };
+        }
+        function updateCalc() {
+          const n = parseInt(slider.value);
+          const r = calcCost(n);
+          document.getElementById("calc-accounts").textContent = n;
+          document.getElementById("calc-free").textContent = `${Math.min(
+            n,
+            2
+          )} 账号`;
+          document.getElementById("calc-tier").textContent =
+            r.rate === null
+              ? "定制"
+              : r.rate === 0
+                ? "全免费"
+                : `$${r.rate}/账号`;
+          document.getElementById("calc-total").textContent =
+            r.total === null
+              ? "联系销售"
+              : `$${r.total}/月`;
+          document.getElementById("calc-note").textContent =
+            r.paid === 0
+              ? "在免费额度内"
+              : `${r.paid} 个付费账号 × $${r.rate} = $${r.total}（区间 ${r.range}）`;
+        }
+        slider.addEventListener("input", updateCalc);
+        updateCalc();
+
+        // Tiers
+        const tierList = document.getElementById("tier-list");
+        tierList.innerHTML = data.pricingTiers
+          .map(
+            (t) => `
+          <div class="flex items-center justify-between gap-4 py-2 border-b border-stone-100 last:border-0">
+            <div class="flex-1">
+              <div class="font-medium">${t.range}</div>
+              <div class="text-xs text-stone-500">${t.note}</div>
+            </div>
+            <div class="text-right">
+              <div class="font-semibold ${
+                t.pricePerAccount === 0
+                  ? "text-green-600"
+                  : t.pricePerAccount === null
+                    ? "text-stone-500"
+                    : "text-orange-600"
+              }">${t.label}</div>
+            </div>
+          </div>
+        `
+          )
+          .join("");
+
+        // Pass-through
+        document.getElementById("passthrough-list").innerHTML =
+          data.passThroughCosts.items
+            .map(
+              (i) => `
+          <div class="bg-white border border-red-100 rounded p-2 text-center">
+            <div class="text-xs text-red-700 mb-1">${i.type}</div>
+            <div class="font-mono text-sm font-semibold">${i.cost}</div>
+          </div>
+        `
+            )
+            .join("");
+        document.getElementById("passthrough-note").textContent =
+          data.passThroughCosts.note;
+
+        // Core features
+        document.getElementById("core-features").innerHTML =
+          data.coreFeatures
+            .map(
+              (f) => `
+          <div class="flex items-start gap-2">
+            <span class="text-green-600 mt-0.5">✓</span>
+            <div>
+              <div class="font-medium">${f.name}</div>
+              <div class="text-xs text-stone-500">${f.desc}</div>
+            </div>
+          </div>
+        `
+            )
+            .join("");
+
+        // Add-on features
+        document.getElementById("addon-features").innerHTML =
+          data.addOnFeatures
+            .map(
+              (f) => `
+          <div class="flex items-start gap-2">
+            <span class="${f.criticalForUs ? "text-red-600" : "text-amber-600"} mt-0.5">${f.criticalForUs ? "🔴" : "+"}</span>
+            <div>
+              <div class="font-medium">${f.name}</div>
+              <div class="text-xs text-stone-500">${f.desc}</div>
+            </div>
+          </div>
+        `
+            )
+            .join("");
+
+        // Platforms
+        document.getElementById("platform-list").innerHTML =
+          data.platforms
+            .map(
+              (p) => `
+          <span class="platform-chip">
+            <span>${p.emoji}</span>
+            <span>${p.name}</span>
+            ${p.note ? `<span class="text-xs text-amber-600 ml-1" title="${p.note}">⚠</span>` : ""}
+          </span>
+        `
+            )
+            .join("");
+
+        // Ads
+        document.getElementById("ads-list").innerHTML = data.adNetworks
+          .map(
+            (a) =>
+              `<span class="platform-chip text-xs">${a}</span>`
+          )
+          .join("");
+
+        // Tech stack
+        document.getElementById("tech-stack").innerHTML = Object.entries({
+          "API 规范": data.techStack.apiSpec,
+          认证: data.techStack.auth,
+          "MCP 支持": data.techStack.mcp,
+          SDK: data.techStack.sdk,
+          "LLM 文档": data.techStack.llmDocs,
+        })
+          .map(
+            ([k, v]) => `
+          <div class="flex justify-between gap-4 py-1.5 border-b border-stone-100 last:border-0">
+            <dt class="text-stone-500">${k}</dt>
+            <dd class="font-medium text-right">${v}</dd>
+          </div>
+        `
+          )
+          .join("");
+
+        // Endpoints
+        document.getElementById("endpoint-list").innerHTML =
+          data.apiEndpointGroups
+            .map(
+              (e) =>
+                `<span class="platform-chip text-xs font-mono">${e}</span>`
+            )
+            .join("");
+
+        // Questions
+        document.getElementById("questions-list").innerHTML =
+          data.openQuestionsForSales
+            .map(
+              (q) => `
+          <li class="flex items-start gap-3 pb-3 border-b border-stone-100 last:border-0">
+            <span class="text-xs px-2 py-0.5 rounded ${q.blocker ? "badge-blocker" : "badge-medium"} flex-shrink-0">${q.blocker ? "BLOCKER" : "MEDIUM"}</span>
+            <div class="text-sm flex-1">
+              <span class="text-stone-400 mr-1">${q.id}.</span>
+              ${q.question}
+            </div>
+          </li>
+        `
+            )
+            .join("");
+
+        // White-label
+        document.getElementById("whitelabel-info").innerHTML = `
+          <div><span class="font-semibold">官方表态：</span>${data.whitelabelNotes.claim}</div>
+          <div class="bg-amber-50 border border-amber-200 rounded p-3 text-amber-900">
+            <div class="font-semibold mb-1">⚠️ 不确定的细节</div>
+            <div>${data.whitelabelNotes.uncertain}</div>
+          </div>
+          <div class="text-stone-500"><span class="font-medium">下一步：</span>${data.whitelabelNotes.needsConfirm}</div>
+        `;
+
+        // Sources
+        document.getElementById("sources-list").innerHTML = data.sources
+          .map(
+            (s) =>
+              `<li>· <a href="${s}" target="_blank" class="text-orange-600 hover:underline">${s}</a></li>`
+          )
+          .join("");
+      }
+      load();
+    </script>
+  </body>
+</html>
